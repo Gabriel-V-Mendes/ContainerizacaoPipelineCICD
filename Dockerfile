@@ -43,7 +43,7 @@ ENV PATH="/opt/venv/bin:$PATH" \
 # 3) Cria um usuário sem privilégios com UID/GID numéricos fixos (permite que
 #    orquestradores como Kubernetes e Docker Compose validem "runAsNonRoot" de forma determinística).
 RUN apt-get update \
-    && apt-get upgrade -y --no-install-recommends \
+    && apt-get dist-upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && python -m pip uninstall -y pip \
     && groupadd --system --gid 10001 app \
