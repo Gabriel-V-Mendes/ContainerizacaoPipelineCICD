@@ -38,9 +38,10 @@ ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# 1) Remove o pip "de sistema" que vem na imagem base (a aplicação usa o venv).
-# 2) Cria um usuário sem privilégios com UID/GID numéricos fixos (permite que
-#    orquestradores validem "runAsNonRoot" sem precisar resolver nomes).
+# 1) Atualiza pacotes da base Debian em runtime (aplica correções de segurança imediatas para CVEs do SO, ex.: zlib1g e apt).
+# 2) Remove o pip "de sistema" que vem na imagem base (a aplicação usa o venv isolado).
+# 3) Cria um usuário sem privilégios com UID/GID numéricos fixos (permite que
+#    orquestradores como Kubernetes e Docker Compose validem "runAsNonRoot" de forma determinística).
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
