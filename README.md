@@ -24,6 +24,7 @@ A primeira versão deste repositório *parecia* ter CI/CD, mas na prática:
 **Critérios de pronto:**
 - [x] Um PR com teste quebrado não faz merge (checks obrigatórios + branch protection, ver [§6](#6-pr-com-teste-quebrado-não-faz-merge)).
 - [x] A imagem final roda sem root (UID `10001`). O CI verifica isso a cada build.
+- [x] O pipeline compila, testa, valida vulnerabilidades e realiza deploy via Docker Compose/SSH com prova da API respondendo na VPS (ver [§5](#5-cicd)).
 - [x] Existe uma tabela antes/depois de tamanho, tempo de build e vulnerabilidades (ver [§7](#7-antes--depois)).
 
 ---
@@ -104,11 +105,11 @@ O pgAdmin é opcional: `docker compose --profile tools up -d` → http://localho
 | PATCH | `/items/{id}` | Atualização parcial | 200 / 404 / 422 |
 | DELETE | `/items/{id}` | Remove | 204 / 404 |
 
-### Evidência Visual da API em Execução
+### Evidência Visual da API em Execução Local / Desenvolvimento
 
-![Swagger UI da DevOps API em Execução](docs/screenshots/api-swagger-running.png)
+![Swagger UI da DevOps API em Execução Local](docs/screenshots/api-swagger-running.png)
 
-![Evidência de Respostas HTTP, Container Non-Root (UID 10001) e Cobertura de Testes](docs/screenshots/api-production-response.png)
+![Evidência de Respostas HTTP Locais, Container Non-Root (UID 10001) e Cobertura de Testes](docs/screenshots/api-production-response.png)
 
 ---
 
@@ -164,9 +165,23 @@ Arquivo: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 Tags publicadas: `sha-<commit>` (imutável, é a usada no deploy), `main`, `latest` e `X.Y.Z` (quando há tag git `vX.Y.Z`).
 
 * **Evidência do CI e do Deploy Real na `main` (GitHub Actions):**
-  [Run #41867864099 no GitHub Actions](https://github.com/Gabriel-V-Mendes/ContainerizacaoPipelineCICD/actions/runs/41867864099) — todos os jobs **`Lint`**, **`Secret Scan`**, **`Test`**, **`Build, Scan & Push`** e **`Deploy (Compose via SSH)`** aprovados (`✓`) na branch `main`.
+  * [Run #41867864099 no GitHub Actions](https://github.com/Gabriel-V-Mendes/ContainerizacaoPipelineCICD/actions/runs/41867864099) e [Run #41959980460 no GitHub Actions](https://github.com/Gabriel-V-Mendes/ContainerizacaoPipelineCICD/actions/runs/41959980460) — todos os jobs **`Lint`**, **`Secret Scan`**, **`Test`**, **`Build, Scan & Push`** e **`Deploy (Compose via SSH)`** aprovados (`✓`) na branch `main`.
 
-![Run #41867864099 na main com o job Deploy (Compose via SSH) Verde](docs/screenshots/ci-deploy-green.png)
+![Run na main com o job Deploy (Compose via SSH) Verde](docs/screenshots/ci-deploy-green.png)
+
+### Evidência Visual da API Respondendo na VPS (Deploy em Produção)
+
+Para comprovar a entrega contínua real além do pipeline verde no GitHub Actions, a execução em produção é validada diretamente na VPS com a imagem publicada no GHCR:
+
+1. **Containers Ativos & Healthchecks na VPS:** Sessão SSH na VPS como usuário `deploy`, contêineres orquestrados via `docker-compose.prod.yml`, status `healthy` e processo restrito sem root (`UID 10001 (app)`).
+2. **Respostas HTTP Reais (`curl -i`):**
+   - `GET /health` (Liveness) ➔ `HTTP/1.1 200 OK` (`{"status":"healthy","message":"API is running!"}`)
+   - `GET /health/ready` (Readiness) ➔ `HTTP/1.1 200 OK` (`{"status":"ready","database":"ok"}`)
+   - `POST /items` (Persistência) ➔ `HTTP/1.1 201 Created` (`{"id":1,"name":"deploy-vps",...}`)
+   - `GET /items` (Consulta) ➔ `HTTP/1.1 200 OK` com os itens gravados no PostgreSQL 18.
+3. **Rastreabilidade Ponta a Ponta:** Log do job `Deploy (Compose via SSH)` no GitHub Actions efetuando `scp`, `docker compose pull` e verificações automatizadas de integridade com timeout de 120 s.
+
+![Evidência da API FastAPI Respondendo na VPS via Docker Compose em Produção](docs/screenshots/api-vps-deploy-response.png)
 
 ### Deploy via Compose: configuração (uma vez)
 
