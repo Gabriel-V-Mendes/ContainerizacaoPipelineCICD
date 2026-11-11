@@ -165,7 +165,7 @@ Arquivo: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 Tags publicadas: `sha-<commit>` (imutável, é a usada no deploy), `main`, `latest` e `X.Y.Z` (quando há tag git `vX.Y.Z`).
 
 * **Evidência do CI e do Deploy Real na `main` (GitHub Actions):**
-  * [Run #41867864099 no GitHub Actions](https://github.com/Gabriel-V-Mendes/ContainerizacaoPipelineCICD/actions/runs/41867864099) e [Run #41959980460 no GitHub Actions](https://github.com/Gabriel-V-Mendes/ContainerizacaoPipelineCICD/actions/runs/41959980460) — todos os jobs **`Lint`**, **`Secret Scan`**, **`Test`**, **`Build, Scan & Push`** e **`Deploy (Compose via SSH)`** aprovados (`✓`) na branch `main`.
+  * [Run #42696901818 no GitHub Actions](https://github.com/Gabriel-V-Mendes/ContainerizacaoPipelineCICD/actions/runs/42696901818) (Commit `sha-76d5eea`), [Run #41959980460](https://github.com/Gabriel-V-Mendes/ContainerizacaoPipelineCICD/actions/runs/41959980460) e [Run #41867864099](https://github.com/Gabriel-V-Mendes/ContainerizacaoPipelineCICD/actions/runs/41867864099) — todos os jobs **`Lint`**, **`Secret Scan`**, **`Test`**, **`Build, Scan & Push`** e **`Deploy (Compose via SSH)`** aprovados (`✓`) na branch `main`.
 
 ![Run na main com o job Deploy (Compose via SSH) Verde](docs/screenshots/ci-deploy-green.png)
 
